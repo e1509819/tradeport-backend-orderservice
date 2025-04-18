@@ -1,0 +1,40 @@
+name: "CI - Backend - Build and Test"
+
+on:
+  push:
+    branches:
+      - main
+      - "feature/**"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    name: 🧪 Build & Test .NET Service
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧾 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🧰 Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: 📦 Restore Dependencies
+        run: dotnet restore
+
+      - name: 🏗️ Build Project
+        run: dotnet build --no-restore --configuration Release
+
+      - name: 🧪 Run Unit Tests
+        run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"
+
+      - name: ⬆ Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults/
