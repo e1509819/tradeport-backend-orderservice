@@ -15,9 +15,9 @@ jobs:
     name: 🧪 Build & Test .NET Service
     runs-on: ubuntu-latest
 
-    env:
-      DOTNET_ROOT: /usr/share/dotnet
-      PATH: $PATH:/home/runner/.dotnet/tools
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - name: 🧾 Checkout Repository
@@ -35,16 +35,16 @@ jobs:
         run: dotnet build --no-restore --configuration Release
 
       - name: 🧪 Run Unit Tests with Code Coverage
-        run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"
+        run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./TestResults
 
-      - name: 📦 Install ReportGenerator Tool
-        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+      - name: 🛠 Install ReportGenerator Tool
+        run: dotnet tool update --global dotnet-reportgenerator-globaltool
 
       - name: 🧾 Generate Code Coverage Report
         run: |
           reportgenerator \
-            -reports:**/coverage.cobertura.xml \
-            -targetdir:coveragereport \
+            -reports:"**/TestResults/**/*.xml" \
+            -targetdir:"TestResults/CodeCoverageReport" \
             -reporttypes:Html
 
       - name: ⬆ Upload Test Results
@@ -56,5 +56,5 @@ jobs:
       - name: ⬆ Upload Code Coverage Report
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-report
-          path: coveragereport/
+          name: code-coverage-report
+          path: TestResults/CodeCoverageReport/
